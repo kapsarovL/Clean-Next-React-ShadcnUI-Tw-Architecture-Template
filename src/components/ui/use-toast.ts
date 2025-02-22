@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { toast as toastFn } from "./toast"
+import { Toast as toastFn } from "./toast"
 
 export function useToast() {
   const [isOpen, setIsOpen] = useState(false)
