@@ -2,16 +2,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
-export default async function ProfilePage() {
+export default async function AdminPage() {
   const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/login");
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/");
   }
   return (
     <div>
-      <h1>Profile</h1>
-      <p>Email: {session.user.email}</p>
-      <p>Role: {session.user.role}</p>
+      <h1>Admin Dashboard</h1>
+      {/* Admin content */}
     </div>
   );
 }

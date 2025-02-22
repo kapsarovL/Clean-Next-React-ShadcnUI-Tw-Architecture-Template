@@ -25,6 +25,15 @@ const deleteTask = async (id: string) => {
   await fetch(`/api/tasks?id=${id}`, { method: "DELETE" })
 }
 
+const updateTask = async ({ id, title }: { id: string; title: string }) => {
+  const res = await fetch(`/api/tasks?id=${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  })
+  return res.json()
+}
+
 export function useTasks() {
   const queryClient = useQueryClient()
 
@@ -43,10 +52,17 @@ export function useTasks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   })
 
+  const updateMutation = useMutation({
+    mutationFn: updateTask,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  })
+
   return {
     tasks,
     loading,
     addTask: (title: string) => addMutation.mutate(title),
     deleteTask: (id: string) => deleteMutation.mutate(id),
+    updateTask: ({ id, title }: { id: string; title: string }) =>
+      updateMutation.mutate({ id, title }),
   }
 }
