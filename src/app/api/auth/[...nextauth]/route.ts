@@ -16,23 +16,20 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-        });
-        if (!user) {
-          return null;
+        })
+        
+        if (!user || !(await bcrypt.compare(credentials.password, user.password))) return null
+        return {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          profilePictureUrl: user.profilePictureUrl,
+          notificationsEmail: user.notificationsEmail,
+          notificationsPush: user.notificationsPush,
         }
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-        if (!isPasswordValid) {
-          return null;
-        }
-        return user;
       },
     }),
   ],
@@ -42,8 +39,11 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        token.id = user.id
+        token.role = user.role
+        token.profilePictureUrl = user.profilePictureUrl
+        token.notificationsEmail = user.notificationsEmail
+        token.notificationsPush = user.notificationsPush
       }
       return token;
     },
@@ -54,6 +54,9 @@ export const authOptions = {
       }
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
 };
 
