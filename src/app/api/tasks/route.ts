@@ -1,20 +1,10 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { getServerSession, NextAuthOptions, Session } from "next-auth";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const prisma = new PrismaClient();
-
-// Mock database (replace with actual DB in production)
-let tasks: { id: string; title: string }[] = []
+import prisma from "@/lib/prisma";
 
 export async function GET() {
-  const session = await getServerSession(authOptions as NextAuthOptions) as Session & {
-    user: {
-      id: string;
-      email?: string;
-    }
-  };
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -26,12 +16,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions as NextAuthOptions) as Session & {
-    user: {
-      id: string;
-      email?: string;
-    }
-  };
+  const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -46,21 +31,17 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions as NextAuthOptions) as Session & {
-    user: {
-      id: string;
-      email?: string;
-    }
-  };
+  const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ message: "Task ID is required" }, { status: 400 });
+  }
   const { title } = await request.json();
-  const task = await prisma.task.findUnique({
-    where: { id },
-  });
+  const task = await prisma.task.findUnique({ where: { id } });
   if (!task || task.userId !== session.user.id) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
@@ -72,25 +53,19 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await getServerSession(authOptions as NextAuthOptions) as Session & {
-    user: {
-      id: string;
-      email?: string;
-    }
-  };
+  const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const task = await prisma.task.findUnique({
-    where: { id },
-  });
+  if (!id) {
+    return NextResponse.json({ message: "Task ID is required" }, { status: 400 });
+  }
+  const task = await prisma.task.findUnique({ where: { id } });
   if (!task || task.userId !== session.user.id) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
-  await prisma.task.delete({
-    where: { id },
-  });
+  await prisma.task.delete({ where: { id } });
   return NextResponse.json({ message: "Task deleted" });
 }
