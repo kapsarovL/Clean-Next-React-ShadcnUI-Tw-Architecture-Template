@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Image from "next/image"
 import { useToast } from "@/components/ui/use-toast"
 import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { useForm } from "react-hook-form"
@@ -168,7 +167,8 @@ export function SettingsForm() {
           <Label htmlFor="profilePicture">Profile Picture</Label>
           <div className="flex items-center gap-4">
             {profilePicturePreview && (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={profilePicturePreview}
                 alt="Profile Preview"
                 className="w-16 h-16 rounded-full object-cover"
@@ -184,7 +184,7 @@ export function SettingsForm() {
             />
           </div>
           {errors.profilePicture && (
-            <p className="text-sm text-destructive">{errors.profilePicture.message}</p>
+            <p className="text-sm text-destructive">{String(errors.profilePicture.message)}</p>
           )}
         </div>
 

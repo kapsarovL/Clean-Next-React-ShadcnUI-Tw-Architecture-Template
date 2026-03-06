@@ -1,11 +1,9 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 import { redirect } from "next/navigation"
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/lib/prisma"
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute"
 import { DashboardContent } from "@/components/dashboard/DashboardContent"
-
-const prisma = new PrismaClient()
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions)
@@ -27,7 +25,6 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <DashboardContent tasks={tasks} />
       </div>
-        <DashboardContent />
         </ProtectedRoute>
     )
     }
