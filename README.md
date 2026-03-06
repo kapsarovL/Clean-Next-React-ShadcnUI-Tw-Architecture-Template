@@ -1,36 +1,135 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clean Next.js Architecture Template
+
+A production-ready Next.js 16 starter template with authentication, database, UI components, and testing pre-configured.
+
+## Stack
+
+| Layer | Technology |
+| ------- | ----------- |
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 3 + shadcn/ui |
+| Auth | NextAuth.js 4 (JWT, Credentials provider) |
+| Database | Prisma 7 + SQLite (via `better-sqlite3`) |
+| Data fetching | TanStack Query 5 |
+| Forms | React Hook Form 7 + Zod |
+| Testing | Jest + Testing Library |
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/   # NextAuth handler + authOptions
+│   │   ├── auth/signup/          # Registration endpoint
+│   │   ├── tasks/                # CRUD task endpoints
+│   │   └── user/                 # Profile update endpoint
+│   ├── admin/                    # Admin-only page
+│   ├── dashboard/                # Protected dashboard
+│   ├── login/                    # Login page
+│   ├── profile/                  # Profile page
+│   ├── settings/                 # Settings page + form
+│   ├── signup/                   # Signup page
+│   └── tasks/                    # Tasks page
+├── components/
+│   ├── auth/                     # LoginForm, SignUpForm
+│   ├── common/                   # LoadingSpinner
+│   ├── dashboard/                # DashboardContent, DataTable
+│   ├── layout/                   # Navbar, Sidebar, ProtectedRoute
+│   ├── shared/                   # ThemeToggle
+│   ├── tasks/                    # TaskForm, TaskList, TaskEditForm
+│   └── ui/                       # shadcn/ui primitives
+├── context/
+│   └── AuthContext.tsx           # Client-side auth state
+├── hooks/
+│   ├── use-toast.ts              # Toast state management
+│   ├── useAuth.ts
+│   ├── useTasks.ts               # TanStack Query task hooks
+│   └── useTheme.ts               # Dark/light theme
+├── lib/
+│   ├── prisma.ts                 # Shared PrismaClient (adapter-based)
+│   └── utils.ts                  # cn() helper
+├── types/
+│   ├── index.ts
+│   └── next-auth.d.ts            # NextAuth session type augmentation
+└── __test__/
+    └── components/TaskList.test.tsx
+prisma/
+├── schema.prisma
+├── migrations/
+└── seed.ts
+prisma.config.ts                  # Prisma 7 datasource config
+```
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Create a `.env` file at the project root:
+
+```env
+DATABASE_URL="file:./prisma/dev.db"
+NEXTAUTH_SECRET="your-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### 3. Set up the database
+
+```bash
+npx prisma migrate dev
+# optionally seed
+npx ts-node prisma/seed.ts
+```
+
+### 4. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev      # Start dev server with Turbopack
+npm run build    # Production build
+npm run start    # Start production server
+npm run lint     # ESLint
+npm run test     # Jest tests
+```
 
-## Learn More
+## Authentication
 
-To learn more about Next.js, take a look at the following resources:
+- **Credentials provider** — email + bcrypt password via NextAuth.js
+- **JWT sessions** — token carries `id`, `role`, `profilePictureUrl`, `notificationsEmail`, `notificationsPush`
+- **Role-based access** — `ProtectedRoute` component supports `requiredRole: "USER" | "ADMIN"`
+- Sign-in page: `/login` — Sign-up page: `/signup`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Prisma 7 with SQLite. Schema models:
 
-## Deploy on Vercel
+- **User** — `id`, `email`, `password`, `role` (USER | ADMIN), `profilePictureUrl`, `notificationsEmail`, `notificationsPush`
+- **Task** — `id`, `title`, `userId`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The `PrismaClient` is instantiated once in `src/lib/prisma.ts` using `@prisma/adapter-better-sqlite3` and shared across all route handlers.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Theme
+
+Dark/light mode toggle via `useTheme` hook — persisted in `localStorage` and applied as a `dark` class on `<html>`.
+
+## Testing
+
+```bash
+npm run test
+```
+
+Uses Jest + `@testing-library/react`. Setup file: `src/__test__/setup.ts`.
