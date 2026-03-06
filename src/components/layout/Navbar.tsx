@@ -1,41 +1,49 @@
-"use client"
-import { useSession, signOut } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/shared/ThemeToggle"
-import Link from "next/link"
+'use client';
+
+import { useSession, signOut } from 'next-auth/react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export function Navbar() {
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   return (
     <nav className="border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold">Logo</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" asChild>
-              <Link href="/">Home</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/about">About</Link>
-            </Button>
-            {session ? (
-              <Button variant="ghost" onClick={() => signOut({ callbackUrl: "/login" })}>
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link href="/" className="text-xl font-bold">
+          Next.js Template
+        </Link>
+
+        <div className="flex gap-4 items-center">
+          {session ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+              <Link href="/tasks">
+                <Button variant="ghost">Tasks</Button>
+              </Link>
+              {session.user.role === 'ADMIN' && (
+                <Link href="/admin">
+                  <Button variant="ghost">Admin</Button>
+                </Link>
+              )}
+              <Button onClick={() => signOut()} variant="outline">
                 Sign Out
               </Button>
-            ) : (
-              <Link href="/api/auth/signin">
-                <Button variant="ghost">Sign In</Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost">Login</Button>
               </Link>
-            )}
-            <ThemeToggle />
-          </div>
+              <Link href="/signup">
+                <Button>Sign Up</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
-  )
+  );
 }

@@ -1,71 +1,56 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
 
+const taskSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+});
+
+// GET all tasks for current user
 export async function GET() {
   const session = await getServerSession(authOptions);
-
-  if (!session) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   const tasks = await prisma.task.findMany({
     where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
   });
+
   return NextResponse.json(tasks);
 }
 
+// POST create new task
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { title } = await request.json();
-  const newTask = await prisma.task.create({
-    data: {
-      title,
-      userId: session.user.id,
-    },
-  });
-  return NextResponse.json(newTask, { status: 201 });
-}
 
-export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ message: "Task ID is required" }, { status: 400 });
-  }
-  const { title } = await request.json();
-  const task = await prisma.task.findUnique({ where: { id } });
-  if (!task || task.userId !== session.user.id) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
-  const updatedTask = await prisma.task.update({
-    where: { id },
-    data: { title },
-  });
-  return NextResponse.json(updatedTask);
-}
+  try {
+    const body = await request.json();
+    const { title } = taskSchema.parse(body);
 
-export async function DELETE(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const task = await prisma.task.create({
+      data: {
+        title,
+        userId: session.user.id,
+      },
+    });
+
+    return NextResponse.json(task, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  if (!id) {
-    return NextResponse.json({ message: "Task ID is required" }, { status: 400 });
-  }
-  const task = await prisma.task.findUnique({ where: { id } });
-  if (!task || task.userId !== session.user.id) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
-  await prisma.task.delete({ where: { id } });
-  return NextResponse.json({ message: "Task deleted" });
 }

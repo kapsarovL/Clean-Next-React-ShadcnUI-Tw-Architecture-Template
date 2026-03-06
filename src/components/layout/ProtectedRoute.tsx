@@ -1,23 +1,42 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { redirect } from "next/navigation"
-import { ReactNode } from "react"
+'use client';
+
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
-  children: ReactNode
-  requiredRole?: "USER" | "ADMIN"
+  children: React.ReactNode;
+  requiredRole?: 'USER' | 'ADMIN';
 }
 
-export async function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const session = await getServerSession(authOptions)
+export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+
+    if (requiredRole && session.user.role !== requiredRole) {
+      router.push('/dashboard');
+    }
+  }, [session, status, router, requiredRole]);
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
 
   if (!session) {
-    redirect("/login")
+    return null;
   }
 
   if (requiredRole && session.user.role !== requiredRole) {
-    redirect("/unauthorized") // Create an unauthorized page if needed
+    return null;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

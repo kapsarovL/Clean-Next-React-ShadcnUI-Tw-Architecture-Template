@@ -1,68 +1,57 @@
-"use client"
-
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Task {
-  id: string
-  title: string
-}
-
-const fetchTasks = async (): Promise<Task[]> => {
-  const res = await fetch("/api/tasks")
-  return res.json()
-}
-
-const addTask = async (title: string) => {
-  const res = await fetch("/api/tasks", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title }),
-  })
-  return res.json()
-}
-
-const deleteTask = async (id: string) => {
-  await fetch(`/api/tasks?id=${id}`, { method: "DELETE" })
-}
-
-const updateTask = async ({ id, title }: { id: string; title: string }) => {
-  const res = await fetch(`/api/tasks?id=${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title }),
-  })
-  return res.json()
+  id: string;
+  title: string;
+  completed: boolean;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function useTasks() {
-  const queryClient = useQueryClient()
+  return useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
+      const res = await fetch('/api/tasks');
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      return res.json() as Promise<Task[]>;
+    },
+  });
+}
 
-  const { data: tasks = [], isLoading: loading } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: fetchTasks,
-  })
+export function useCreateTask() {
+  const queryClient = useQueryClient();
 
-  const addMutation = useMutation({
-    mutationFn: addTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  })
+  return useMutation({
+    mutationFn: async (title: string) => {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) throw new Error('Failed to create task');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  })
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
 
-  const updateMutation = useMutation({
-    mutationFn: updateTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
-  })
-
-  return {
-    tasks,
-    loading,
-    addTask: (title: string) => addMutation.mutate(title),
-    deleteTask: (id: string) => deleteMutation.mutate(id),
-    updateTask: ({ id, title }: { id: string; title: string }) =>
-      updateMutation.mutate({ id, title }),
-  }
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete task');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 }
