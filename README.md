@@ -1,6 +1,6 @@
 # Clean Next.js Architecture Template
 
-> Production-ready Next.js 16 starter — auth, database, UI, and testing pre-configured.
+> Production-ready Next.js 16 starter auth, database, UI, and testing pre-configured.
 > Ship features on day one instead of spending a week on boilerplate.
 
 ---
@@ -40,11 +40,11 @@ This template eliminates that entirely.
 
 **Why this structure matters:**
 
-- **Role-based access** — `ProtectedRoute` supports `USER` and `ADMIN` roles without additional setup
-- **JWT sessions** — token carries `id`, `role`, `profilePictureUrl`, and notification preferences
-- **Shared PrismaClient** — single instance across all route handlers, no connection leaks
-- **TanStack Query hooks** — data fetching logic separated from UI components
-- **Zod + React Hook Form** — validation runs client and server side from the same schema
+- **Role-based access** `ProtectedRoute` supports `USER` and `ADMIN` roles without additional setup
+- **JWT sessions** token carries `id`, `role`, `profilePictureUrl`, and notification preferences
+- **Shared PrismaClient** single instance across all route handlers, no connection leaks
+- **TanStack Query hooks** data fetching logic separated from UI components
+- **Zod + React Hook Form** validation runs client and server side from the same schema
 
 ---
 
