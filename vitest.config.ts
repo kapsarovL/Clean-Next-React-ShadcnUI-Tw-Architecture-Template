@@ -5,6 +5,9 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   test: {
+    // Make describe/it/expect/vi available globally without explicit imports
+    globals: true,
+
     // Use jsdom to simulate browser environment for React components
     environment: 'jsdom',
 

@@ -34,7 +34,7 @@ module.exports = {
 
     'body-max-line-length': [2, 'always', 120],
 
-    'scope-case': [2, 'aways', 'lower-case'],
+    'scope-case': [2, 'always', 'lower-case'],
   }
 }
 
