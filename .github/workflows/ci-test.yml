@@ -1,0 +1,53 @@
+# .github/workflows/test.yml
+# Runs on every push to main and on every pull request.
+# Provides: type checking, linting, unit tests, and coverage reporting.
+#
+# Setup: Copy this file to .github/workflows/test.yml in your repository.
+# Required secrets: none (coverage badge uses the built-in GITHUB_TOKEN)
+
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true  # Cancel outdated runs on new pushes
+
+jobs:
+  test:
+    name: Type Check · Lint · Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci  # ci is faster and stricter than npm install
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test -- --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()  # Upload even if tests fail, for debugging
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

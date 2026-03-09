@@ -11,6 +11,9 @@ declare module 'next-auth' {
       id: string;
       email: string;
       role: string;
+      profilePictureUrl?: string;
+      notificationsEmail?: boolean;
+      notificationsPush?: boolean;
     }
   }
 }

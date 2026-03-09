@@ -1,0 +1,47 @@
+# .github/dependabot.yml
+# Automated dependency updates with sensible defaults.
+# Place this file at: .github/dependabot.yml
+#
+# Strategy:
+# - Patch updates auto-merge (low risk, handled by the auto-merge workflow below)
+# - Minor/major updates open PRs for review — never auto-merged
+# - Grouped by ecosystem to avoid PR spam
+
+version: 2
+updates:
+  # npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "automated"
+    groups:
+      # Group all patch updates into a single weekly PR
+      patch-updates:
+        patterns: ["*"]
+        update-types: ["patch"]
+    ignore:
+      # Never auto-update major versions — review manually
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci(deps)"

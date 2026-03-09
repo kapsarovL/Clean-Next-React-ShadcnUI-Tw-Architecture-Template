@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi } from 'vitest';
 import { TaskList } from '@/components/tasks/TaskList';
 
 const createTestQueryClient = () =>
@@ -24,14 +25,14 @@ describe('TaskList', () => {
   });
 
   it('displays tasks after loading', async () => {
-    global.fetch = jest.fn(() =>
+    global.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve([
           { id: '1', title: 'Test Task', completed: false },
         ]),
       })
-    ) as jest.Mock;
+    ) as unknown as typeof fetch;
 
     const queryClient = createTestQueryClient();
     

@@ -120,7 +120,7 @@ export function SettingsForm() {
 
     try {
       const response = await fetch("/api/user", {
-        method: "PUT",
+        method: "PATCH",
         body: formData,
       })
 

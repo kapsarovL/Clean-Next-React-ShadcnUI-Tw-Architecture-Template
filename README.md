@@ -1,316 +1,201 @@
-# Next.js Production Architecture Template
+# Clean Next.js Architecture Template
 
-Production-grade Next.js 16 starter demonstrating authentication, database operations, form handling, and comprehensive testing.
+![Tests](https://github.com/your-username/Clean-Next-React-ShadcnUI-Tw-Architecture-Template/actions/workflows/ci-test.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-**Built to answer:** "How do you architect a real-world Next.js application with auth, database, and testing?"
-
----
-
-## Why This Exists
-
-Most Next.js tutorials show isolated features. This template demonstrates how to **integrate** authentication, database, forms, and testing in a production-ready architecture.
-
-**Real-world patterns demonstrated:**
-
-- NextAuth.js JWT sessions with role-based access control
-- Prisma ORM with migration workflow
-- Server Actions + TanStack Query data fetching
-- React Hook Form + Zod validation
-- Jest + Testing Library component tests
+A production-ready starter for Next.js projects with authentication, database, testing, and CI/CD configured out of the box. Clone it, rename it, and ship — without spending a sprint on boilerplate.
 
 ---
 
-## Technical Architecture
+## What This Does
 
-### Authentication Flow
+Most Next.js starters give you a blank canvas. This template gives you a working application with auth, a database-backed REST API, role-based access, and a full quality pipeline — so you can start building features on day one instead of wiring infrastructure.
 
-- **Provider:** NextAuth.js 4 with Credentials (email + bcrypt)
-- **Session:** JWT tokens carrying user ID, role, preferences
-- **Authorization:** Server-side role checks (USER vs ADMIN)
-- **Protected Routes:** `ProtectedRoute` component wrapper
+---
 
-### Database Layer
+## Technical Highlights
 
-- **ORM:** Prisma 7 with SQLite (dev) → PostgreSQL (production)
-- **Models:** User (with role-based permissions), Task (CRUD operations)
-- **Migrations:** Version-controlled schema changes
-- **Seeding:** Development data initialization scripts
+- **JWT session auth** via NextAuth with a Credentials provider, role (`USER` / `ADMIN`) stored in the token and surfaced on `session.user`
+- **Prisma 7 + SQLite** using the `better-sqlite3` driver adapter — zero external database required for local development
+- **React Query** for all server state — optimistic updates, cache invalidation, and loading states without prop drilling
+- **Zod validation** on every API route — malformed requests are rejected before they touch the database
+- **Vitest + Testing Library** with jsdom, coverage thresholds enforced in CI
+- **Conventional Commits** enforced via commitlint + Husky pre-commit hook
+- **GitHub Actions** pipelines for test gating and Vercel deployment
 
-### Data Fetching Strategy
+---
 
-- **Client:** TanStack Query for server state caching
-- **Server:** Next.js Server Actions for mutations
-- **Optimistic Updates:** Instant UI feedback with rollback on error
+## Features
 
-### Form Architecture
-
-- **Validation:** Zod schemas (shared client + server)
-- **UI:** React Hook Form (optimized re-renders)
-- **Error Handling:** Field-level + form-level error display
-
-### Testing Coverage
-
-- Component tests (React Testing Library)
-- Custom hooks testing
-- Auth flow integration tests
-- API route validation tests
+- Sign up / log in with email and password
+- Per-user task management (create, complete, delete)
+- Role-based admin page
+- User settings (notifications, profile picture URL)
+- Toast notifications
+- Dark/light theme toggle
+- Protected routes with session-aware redirect
 
 ---
 
 ## Tech Stack
 
-**Framework:** Next.js 16 (App Router, Turbopack)  
-**Language:** TypeScript 5  
-**Database:** Prisma 7 + SQLite (dev) / PostgreSQL (prod)  
-**Auth:** NextAuth.js 4 (JWT sessions)  
-**Data Fetching:** TanStack Query 5  
-**Forms:** React Hook Form 7 + Zod  
-**Styling:** Tailwind CSS 3 + shadcn/ui  
-**Testing:** Jest + Testing Library
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 3 + shadcn/ui |
+| Auth | NextAuth 4 (JWT, Credentials) |
+| Database | SQLite via Prisma 7 + better-sqlite3 |
+| Server state | TanStack React Query 5 |
+| Forms | React Hook Form + Zod |
+| Testing | Vitest 4 + Testing Library |
+| CI/CD | GitHub Actions + Vercel |
+| Commit lint | commitlint + Husky |
 
 ---
 
-## Project Structure
+## Prerequisites
 
-```
-
-src/
-├── app/
-│   ├── api/
-│   │   ├── auth/             # NextAuth handlers
-│   │   ├── tasks/            # CRUD endpoints
-│   │   └── user/             # Profile operations
-│   ├── dashboard/            # Protected dashboard
-│   ├── admin/                # Admin-only pages
-│   └── (auth)/               # Login/signup routes
-├── components/
-│   ├── auth/                 # Auth forms
-│   ├── layout/               # Navbar, Sidebar, ProtectedRoute
-│   └── ui/                   # shadcn/ui components
-├── hooks/
-│   ├── useAuth.ts            # Auth state management
-│   ├── useTasks.ts           # TanStack Query hooks
-│   └── useTheme.ts           # Dark mode toggle
-├── lib/
-│   ├── prisma.ts             # PrismaClient singleton
-│   └── utils.ts              # Shared utilities
-└── __test__/                 # Test suites
-```
+- Node.js 20+
+- npm 10+
 
 ---
 
-## Quick Start
-
-### Prerequisites
-
-- Node.js 18+
-- npm 9+
-
-### Installation
+## Getting Started
 
 ```bash
-# Clone and install
-git clone [your-repo-url]
-cd nextjs-architecture-template
+# 1. Clone
+git clone https://github.com/your-username/Clean-Next-React-ShadcnUI-Tw-Architecture-Template.git
+cd Clean-Next-React-ShadcnUI-Tw-Architecture-Template
+
+# 2. Install
 npm install
 
-# Configure environment
-cp .env.example .env
-# Edit DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL
+# 3. Configure environment
+cp .env.example .env.local
+# Edit .env.local — see Environment Variables below
 
-# Initialize database
-npx prisma migrate dev
-npx ts-node prisma/seed.ts
+# 4. Set up the database
+npx prisma migrate deploy
 
-# Start development
+# 5. Run
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## Key Features Implemented
+## Environment Variables
 
-### Authentication & Authorization
+| Variable | Description | Required |
+|---|---|---|
+| `DATABASE_URL` | SQLite file path, e.g. `file:./prisma/dev.db` | Yes |
+| `NEXTAUTH_SECRET` | Random secret for JWT signing (`openssl rand -base64 32`) | Yes |
+| `NEXTAUTH_URL` | Base URL of your app, e.g. `http://localhost:3000` | Yes |
 
-- ✅ Email + password authentication with bcrypt
-- ✅ JWT session management
-- ✅ Role-based access control (USER, ADMIN)
-- ✅ Protected routes (client + server validation)
-- ✅ Session persistence across page reloads
+For Vercel deployment, also add:
 
-### Database Operations
-
-- ✅ User management (create, read, update)
-- ✅ Task CRUD with user ownership
-- ✅ Migration scripts for schema versioning
-- ✅ Seed data for development environment
-
-### Form Handling
-
-- ✅ Login/signup forms with validation
-- ✅ Profile settings with image upload
-- ✅ Notification preferences (email, push)
-- ✅ Real-time field validation
-- ✅ Server-side validation fallback
-
-### UI/UX
-
-- ✅ Dark/light theme toggle
-- ✅ Responsive navigation (sidebar + mobile)
-- ✅ Loading states for async operations
-- ✅ Toast notifications for user feedback
-- ✅ Accessible form controls (shadcn/ui)
-
-### Testing
-
-- ✅ Component unit tests
-- ✅ Custom hook tests
-- ✅ Integration tests for auth flow
-- ✅ API route validation tests
+| Variable | Description |
+|---|---|
+| `VERCEL_TOKEN` | From vercel.com/account/tokens |
+| `VERCEL_ORG_ID` | From `.vercel/project.json` after `vercel link` |
+| `VERCEL_PROJECT_ID` | From `.vercel/project.json` after `vercel link` |
 
 ---
 
 ## Available Scripts
 
 | Command | Description |
-
-|---------|-------------|
-| `npm run dev` | Start dev server (Turbopack) |
+|---|---|
+| `npm run dev` | Start development server with Turbopack |
 | `npm run build` | Production build |
 | `npm run start` | Start production server |
-| `npm run lint` | ESLint check |
-| `npm run test` | Run test suite |
-| `npm run test:watch` | Tests in watch mode |
-| `npx prisma studio` | Open database GUI |
-| `npx prisma migrate dev` | Create new migration |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run Vitest in watch mode |
+| `npm run test:coverage` | Run tests with V8 coverage report |
 
 ---
 
-## Production Deployment
+## Project Structure
 
-### Vercel + Neon PostgreSQL
-
-1. **Database Setup**
-
-```bash
-   # Create Neon project at neon.tech
-   # Update .env with production DATABASE_URL
-   npx prisma migrate deploy
 ```
-
-1. **Vercel Deployment**
-
-```bash
-   # Install Vercel CLI
-   npm i -g vercel
-   
-   # Deploy
-   vercel --prod
+.
+├── .github/
+│   ├── dependabot.yml          # Automated dependency updates
+│   └── workflows/
+│       ├── ci-test.yml         # Type check · lint · test on every PR
+│       └── ci-deploy.yml       # Deploy to Vercel after tests pass
+├── .husky/
+│   └── commit-msg              # Runs commitlint on every commit
+├── prisma/
+│   ├── schema.prisma           # User + Task models
+│   ├── migrations/             # Migration history
+│   └── dev.db                  # Local SQLite database
+├── prisma.config.ts            # Prisma 7 datasource config
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── [...nextauth]/route.ts   # NextAuth handler + authOptions
+│   │   │   │   └── signup/route.ts          # POST /api/auth/signup
+│   │   │   ├── tasks/
+│   │   │   │   ├── route.ts                 # GET, POST /api/tasks
+│   │   │   │   └── [id]/route.ts            # PATCH, DELETE /api/tasks/:id
+│   │   │   └── user/route.ts                # GET /api/user
+│   │   ├── admin/              # Admin-only page
+│   │   ├── dashboard/          # Main dashboard
+│   │   ├── login/              # Sign in page
+│   │   ├── signup/             # Registration page
+│   │   ├── settings/           # User settings page
+│   │   ├── tasks/              # Task management page
+│   │   └── layout.tsx          # Root layout (SessionProvider, QueryClient, Toaster)
+│   ├── components/
+│   │   ├── auth/               # LoginForm, SignUpForm
+│   │   ├── dashboard/          # DashboardContent, DataTable
+│   │   ├── layout/             # Navbar, Sidebar, ProtectedRoute
+│   │   ├── shared/             # ThemeToggle
+│   │   ├── tasks/              # TaskList, TaskForm, TaskEditForm
+│   │   └── ui/                 # shadcn/ui primitives
+│   ├── context/
+│   │   └── AuthContext.tsx     # Client-side auth context wrapping useSession
+│   ├── hooks/
+│   │   ├── useAuth.ts          # Typed session hook
+│   │   ├── useTasks.ts         # React Query hooks for tasks CRUD
+│   │   └── useTheme.ts         # Theme toggle hook
+│   ├── lib/
+│   │   ├── prisma.ts           # Singleton PrismaClient with better-sqlite3 adapter
+│   │   └── utils.ts            # cn() Tailwind class merge helper
+│   └── types/
+│       ├── index.ts            # Shared TypeScript types
+│       └── next-auth.d.ts      # Session type augmentation (id, role)
+├── commitlint.config.cjs       # Conventional Commits rules
+├── vitest.config.ts            # Test runner + coverage config
+└── .eslintrc                   # TypeScript-aware ESLint rules
 ```
-
-1. **Environment Variables**
-
-   - `DATABASE_URL` → Neon connection string
-   - `NEXTAUTH_SECRET` → Generate with `openssl rand -base64 32`
-   - `NEXTAUTH_URL` → Your production domain
 
 ---
 
 ## Architecture Decisions
 
-### Why JWT Sessions?
+**Why SQLite?** Zero-config local development. Swap to PostgreSQL by changing `provider` in `schema.prisma` and the adapter in `prisma.ts` — all query code stays the same.
 
-- Stateless authentication (no server-side session storage)
-- Scales horizontally without session coordination
-- Suitable for serverless deployments (Vercel)
+**Why Prisma 7 driver adapter?** Prisma 7 removed the built-in SQLite driver in favour of explicit driver adapters. The `better-sqlite3` adapter is synchronous and fast; connection config lives in `prisma.config.ts` rather than the schema.
 
-### Why Prisma Over Raw SQL?
+**Why React Query over server components for data?** This template demonstrates patterns applicable to both SPA and hybrid apps. React Query gives you cache management, loading/error states, and optimistic updates without lifting state.
 
-- Type-safe database queries
-- Migration management built-in
-- Easy database switching (SQLite → PostgreSQL)
-- Excellent TypeScript integration
-
-### Why TanStack Query?
-
-- Automatic caching and revalidation
-- Optimistic updates for instant UI
-- Background refetching for fresh data
-- Better DevTools than native fetch
-
-### Why React Hook Form + Zod?
-
-- Minimal re-renders (better performance)
-- Schema reuse (client + server validation)
-- Type inference from Zod schemas
-- Better UX than uncontrolled forms
+**Why JWT sessions?** Stateless — no session table required. Role is embedded in the token and available on every request without a database round-trip.
 
 ---
 
-## Testing Strategy
+## Contributing
 
-```bash
-npm run test
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the PR workflow, branch naming, and commit format.
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
 ```
-
-**Coverage areas:**
-
-- Auth component rendering and interactions
-- Task CRUD operations
-- Protected route access control
-- Form validation logic
-- Theme toggle persistence
-
-**Example test:**
-
-```typescript
-// TaskList.test.tsx
-it('displays tasks correctly', () => {
-  render(<TaskList tasks={mockTasks} />);
-  expect(screen.getByText('Task 1')).toBeInTheDocument();
-});
+feat(auth): add OAuth GitHub provider
+fix(tasks): prevent duplicate task creation on double-click
+docs(readme): add architecture decision for SQLite
 ```
-
----
-
-## Roadmap
-
-- [ ] OAuth providers (Google, GitHub)
-- [ ] Email verification flow
-- [ ] Password reset functionality
-- [ ] User avatar upload to S3
-- [ ] Real-time updates (WebSocket)
-- [ ] API rate limiting
-- [ ] Comprehensive E2E tests (Playwright)
-
----
-
-## What I Learned Building This
-
-**Authentication Complexity:**
-
-- JWT token management requires careful expiration handling
-- Role-based access needs both client and server validation
-- Session persistence across deployments requires stateless design
-
-**Database Patterns:**
-
-- Prisma migrations prevent schema drift in teams
-- Seed scripts essential for consistent dev environments
-- Connection pooling matters for serverless (PrismaClient singleton)
-
-**Form Architecture:**
-
-- Schema-first validation (Zod) prevents client/server mismatch
-- Optimistic updates improve perceived performance
-- Error boundaries critical for form submission failures
-
----
-
-**Status:** Production-ready | Fully tested | Open for contributions
-
-**Built by:** [Lazar Kapsarov](https://github.com/kapsarovL)  
-
-**Contact:** kapsarovlazar@gmail.com
