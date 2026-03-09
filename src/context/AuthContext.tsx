@@ -13,7 +13,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = (_token: string) => {
+  const login = (_: string) => {
     setIsAuthenticated(true)
   }
 

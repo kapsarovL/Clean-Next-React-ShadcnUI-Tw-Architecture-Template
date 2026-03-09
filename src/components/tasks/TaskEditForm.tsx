@@ -29,7 +29,7 @@ export function TaskForm() {
         title: "Success",
         description: "Task added successfully.",
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Error",
