@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci  # ci is faster and stricter than npm install
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+
       - name: TypeScript type check
         run: npx tsc --noEmit
 
