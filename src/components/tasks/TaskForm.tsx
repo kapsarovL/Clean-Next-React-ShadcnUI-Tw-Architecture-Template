@@ -4,11 +4,11 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useTasks } from "@/hooks/useTasks"
+import { useCreateTask } from "@/hooks/useTasks"
 
 export function TaskForm() {
   const [title, setTitle] = useState("")
-  const { addTask } = useTasks()
+  const { mutateAsync: addTask } = useCreateTask()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
