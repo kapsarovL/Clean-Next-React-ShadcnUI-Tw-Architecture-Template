@@ -61,7 +61,7 @@ Most Next.js starters give you a blank canvas. This template gives you a working
 
 ---
 
-## Getting Started
+---
 
 ```bash
 # 1. Clone
