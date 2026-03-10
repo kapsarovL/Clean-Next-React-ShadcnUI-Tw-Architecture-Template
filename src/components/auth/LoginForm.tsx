@@ -55,6 +55,7 @@ export function LoginForm() {
           <Input
             id="email"
             type="email"
+            autoComplete="email"
             {...register('email')}
             placeholder="user@example.com"
           />
@@ -68,6 +69,7 @@ export function LoginForm() {
           <Input
             id="password"
             type="password"
+            autoComplete="current-password"
             {...register('password')}
             placeholder="••••••••"
           />

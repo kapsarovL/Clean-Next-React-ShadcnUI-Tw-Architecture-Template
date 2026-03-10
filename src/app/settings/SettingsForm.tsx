@@ -194,6 +194,7 @@ export function SettingsForm() {
           <Input
             id="email"
             type="email"
+            autoComplete="email"
             {...register("email")}
             placeholder="Enter your email"
             disabled={loading || !session}
@@ -209,6 +210,7 @@ export function SettingsForm() {
           <Input
             id="currentPassword"
             type="password"
+            autoComplete="current-password"
             {...register("currentPassword")}
             placeholder="Enter current password"
             disabled={loading || !session}
@@ -224,6 +226,7 @@ export function SettingsForm() {
           <Input
             id="newPassword"
             type="password"
+            autoComplete="new-password"
             {...register("newPassword")}
             placeholder="Enter new password"
             disabled={loading || !session}
@@ -239,6 +242,7 @@ export function SettingsForm() {
           <Input
             id="confirmPassword"
             type="password"
+            autoComplete="new-password"
             {...register("confirmPassword")}
             placeholder="Confirm new password"
             disabled={loading || !session}
