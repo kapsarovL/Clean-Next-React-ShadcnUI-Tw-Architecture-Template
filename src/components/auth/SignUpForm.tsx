@@ -22,7 +22,7 @@ export function SignUpForm() {
       router.push("/login");
     } else {
       const data = await res.json();
-      setError(data.message);
+      setError(data.error ?? 'Something went wrong');
     }
   };
 

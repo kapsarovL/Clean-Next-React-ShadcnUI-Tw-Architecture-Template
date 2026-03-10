@@ -45,10 +45,33 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        // Initial sign-in: load full profile from DB
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: {
+            id: true,
+            role: true,
+            profilePictureUrl: true,
+            notificationsEmail: true,
+            notificationsPush: true,
+          },
+        });
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.profilePictureUrl = dbUser.profilePictureUrl ?? undefined;
+          token.notificationsEmail = dbUser.notificationsEmail;
+          token.notificationsPush = dbUser.notificationsPush;
+        }
+      }
+      if (trigger === 'update' && session) {
+        // Called when client calls update() after settings save
+        if (session.email !== undefined) token.email = session.email;
+        if (session.profilePictureUrl !== undefined) token.profilePictureUrl = session.profilePictureUrl;
+        if (session.notificationsEmail !== undefined) token.notificationsEmail = session.notificationsEmail;
+        if (session.notificationsPush !== undefined) token.notificationsPush = session.notificationsPush;
       }
       return token;
     },
@@ -56,6 +79,9 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.profilePictureUrl = token.profilePictureUrl;
+        session.user.notificationsEmail = token.notificationsEmail;
+        session.user.notificationsPush = token.notificationsPush;
       }
       return session;
     },
