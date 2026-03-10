@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute';
 import { TaskList } from '@/components/tasks/TaskList';
+
+export const metadata: Metadata = { title: 'My Tasks' };
 
 export default function TasksPage() {
   return (

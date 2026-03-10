@@ -18,9 +18,12 @@ Most Next.js starters give you a blank canvas. This template gives you a working
 - **JWT session auth** via NextAuth with a Credentials provider, role (`USER` / `ADMIN`) stored in the token and surfaced on `session.user`
 - **Prisma 7 + Neon PostgreSQL** using the `@prisma/adapter-neon` driver adapter — serverless-ready with connection pooling built in
 - **Next.js middleware** for route protection — unauthenticated users are redirected to `/login`, non-admins are blocked from `/admin`
+- **Rate limiting** on auth and user API routes — sliding-window in-memory store, swap to Upstash Redis for distributed deployments
 - **Vercel Blob** for profile picture uploads — public CDN storage, no extra infrastructure
+- **SEO metadata** on every page via Next.js `metadata` exports and a `title` template in the root layout
 - **React Query** for all server state — optimistic updates, cache invalidation, and loading states without prop drilling
 - **Zod validation** on every API route — malformed requests are rejected before they touch the database
+- **Loading and error boundaries** — `loading.tsx` and `error.tsx` per route for graceful fallbacks
 - **Vitest + Testing Library** with jsdom, coverage thresholds enforced in CI
 - **Conventional Commits** enforced via commitlint + Husky pre-commit hook
 - **GitHub Actions** pipelines for test gating and Vercel deployment
@@ -30,12 +33,15 @@ Most Next.js starters give you a blank canvas. This template gives you a working
 ## Features
 
 - Sign up / log in with email and password
-- Per-user task management (create, complete, delete)
+- Per-user task management — inline create, complete, delete with optimistic UI
 - Role-based admin dashboard with user stats and table
 - User settings — email, password change, profile picture upload, notification preferences
+- Profile page with avatar, join date, and task count
 - Toast notifications
 - Dark/light theme toggle
 - Protected routes with middleware-level redirect
+- Per-page SEO titles via Next.js metadata API
+- Loading skeletons and error recovery on every route
 
 ---
 
@@ -166,18 +172,26 @@ For CI/CD via GitHub Actions, also add these as repository secrets:
 │   │   │   │   └── [id]/route.ts            # PATCH, DELETE /api/tasks/:id
 │   │   │   └── user/route.ts                # GET, PATCH /api/user
 │   │   ├── admin/              # Admin-only dashboard (user stats + table)
-│   │   ├── dashboard/          # Main dashboard
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx        # Main dashboard
+│   │   │   ├── loading.tsx     # Skeleton fallback
+│   │   │   └── error.tsx       # Error boundary
+│   │   ├── tasks/
+│   │   │   ├── page.tsx        # Task management page
+│   │   │   ├── loading.tsx     # Skeleton fallback
+│   │   │   └── error.tsx       # Error boundary
 │   │   ├── login/              # Sign in page
 │   │   ├── signup/             # Registration page
+│   │   ├── profile/            # Profile page (avatar, stats, join date)
 │   │   ├── settings/           # User settings (password, avatar, notifications)
-│   │   ├── tasks/              # Task management page
-│   │   └── layout.tsx          # Root layout (SessionProvider, QueryClient, Toaster)
+│   │   └── layout.tsx          # Root layout — server component, metadata, Providers wrapper
 │   ├── components/
 │   │   ├── auth/               # LoginForm, SignUpForm
-│   │   ├── dashboard/          # DashboardContent, DataTable
-│   │   ├── layout/             # Navbar, Sidebar
+│   │   ├── dashboard/          # DashboardContent
+│   │   ├── layout/             # Navbar, Sidebar, ProtectedRoute
+│   │   ├── providers/          # Providers.tsx (SessionProvider + QueryClientProvider)
 │   │   ├── shared/             # ThemeToggle
-│   │   ├── tasks/              # TaskList, TaskForm, TaskEditForm
+│   │   ├── tasks/              # TaskList (with inline create), TaskEditForm
 │   │   └── ui/                 # shadcn/ui primitives
 │   ├── hooks/
 │   │   ├── useAuth.ts          # Typed session hook
@@ -186,10 +200,12 @@ For CI/CD via GitHub Actions, also add these as repository secrets:
 │   ├── lib/
 │   │   ├── auth-options.ts     # NextAuth config (Credentials provider, JWT callbacks)
 │   │   ├── prisma.ts           # Singleton PrismaClient with Neon adapter
+│   │   ├── rate-limit.ts       # Sliding-window rate limiter
 │   │   └── utils.ts            # cn() Tailwind class merge helper
 │   └── types/
+│       ├── css.d.ts            # CSS module type declaration
 │       ├── index.ts            # Shared TypeScript types
-│       └── next-auth.d.ts      # Session type augmentation (id, role)
+│       └── next-auth.d.ts      # Session type augmentation (id, role, profile fields)
 ├── commitlint.config.cjs       # Conventional Commits rules
 ├── vitest.config.ts            # Test runner + coverage config
 └── eslint.config.mjs           # TypeScript-aware ESLint rules
@@ -208,6 +224,8 @@ For CI/CD via GitHub Actions, also add these as repository secrets:
 **Why React Query over server components for data?** This template demonstrates patterns applicable to both SPA and hybrid apps. React Query gives you cache management, loading/error states, and optimistic updates without lifting state.
 
 **Why JWT sessions?** Stateless — no session table required. Role is embedded in the token and available on every request without a database round-trip.
+
+**Why in-memory rate limiting?** Zero dependencies for a template. The sliding-window Map store is fine for single-process deployments. For Vercel (multiple function instances), replace `src/lib/rate-limit.ts` with `@upstash/ratelimit` + `@upstash/redis` — the call signature stays identical.
 
 ---
 

@@ -1,4 +1,7 @@
+import type { Metadata } from 'next';
 import { getServerSession } from "next-auth/next"
+
+export const metadata: Metadata = { title: 'Dashboard' };
 import { authOptions } from "@/lib/auth-options"
 import { redirect } from "next/navigation"
 import prisma from "@/lib/prisma"

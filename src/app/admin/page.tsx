@@ -1,7 +1,10 @@
+import type { Metadata } from 'next';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = { title: 'Admin' };
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);

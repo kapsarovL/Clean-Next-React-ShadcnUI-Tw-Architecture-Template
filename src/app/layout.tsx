@@ -1,26 +1,24 @@
-"use client"
-import { SessionProvider } from "next-auth/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { Navbar } from "@/components/layout/Navbar"
-import  Sidebar  from "@/components/layout/Sidebar"
-import { Toaster } from "@/components/ui/toaster"
-import { cn } from "@/lib/utils"
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Providers } from '@/components/providers/Providers';
+import { Navbar } from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
+import { Toaster } from '@/components/ui/toaster';
+import { cn } from '@/lib/utils';
+import './globals.css';
 
-const queryClient = new QueryClient();
+export const metadata: Metadata = {
+  title: {
+    default: 'Next.js Template',
+    template: '%s | Next.js Template',
+  },
+  description: 'A production-ready Next.js starter with auth, database, and CI/CD.',
+};
 
-
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen font-sans antialiased")}>
-      <SessionProvider>
-        <QueryClientProvider client={queryClient}>
+      <body className={cn('min-h-screen font-sans antialiased')}>
+        <Providers>
           <Navbar />
           <main className="flex">
             <Sidebar />
@@ -29,8 +27,7 @@ export default function RootLayout({
             </div>
           </main>
           <Toaster />
-        </QueryClientProvider>
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );

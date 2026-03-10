@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { rateLimit } from '@/lib/rate-limit';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -9,6 +10,15 @@ const signupSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
+  const rl = rateLimit(`signup:${ip}`, 5, 15 * 60 * 1000); // 5 per 15 min
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, password } = signupSchema.parse(body);

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { put } from '@vercel/blob';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -37,6 +38,14 @@ export async function PATCH(request: Request) {
 
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const rl = rateLimit(`user-patch:${session.user.id}`, 10, 60 * 1000); // 10 per min
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.retryAfterMs / 1000)) } }
+    );
   }
 
   try {
