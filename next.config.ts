@@ -2,7 +2,7 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ["@prisma/client", "better-sqlite3"],
+  serverExternalPackages: ["@prisma/client", "@neondatabase/serverless"],
 }
 
 export default nextConfig
